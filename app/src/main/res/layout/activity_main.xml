@@ -18,7 +18,7 @@
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="50dp"
         android:gravity="center"
-        android:text="UMBU"
+        android:text="Log In"
         android:textColor="@color/white"
         android:textSize="35dp"
         android:textStyle="bold" />
@@ -61,7 +61,7 @@
     <com.google.android.material.button.MaterialButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/loginbtn"
+        android:id="@+id/btnlogin"
         android:layout_below="@id/txtpassword"
         android:text="LOGIN"
         android:backgroundTint="@color/design_default_color_secondary"
@@ -70,24 +70,14 @@
         />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/forgotpass"
-        android:layout_below="@id/loginbtn"
-        android:text="Forgot password?"
-        android:textColor="@color/white"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="20dp"/>
-
-
-    <TextView
         android:id="@+id/others"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/socialicons"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="6dp"
-        android:text="or sign in with" />
+        android:textSize="18dp"
+        android:text="or register yourself now" />
 
     <LinearLayout
         android:id="@+id/socialicons"
@@ -98,24 +88,13 @@
         android:layout_marginBottom="20dp"
         android:gravity="center">
 
-
         <ImageView
-            android:layout_width="48dp"
+            android:id="@+id/iv_signup"
+            android:layout_width="59dp"
             android:layout_height="48dp"
             android:layout_margin="20dp"
-            android:src="@drawable/google" />
+            android:src="@drawable/register_ic" />
 
-        <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_margin="20dp"
-            android:src="@drawable/fb" />
-
-        <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_margin="20dp"
-            android:src="@drawable/twitter" />
 
     </LinearLayout>
 

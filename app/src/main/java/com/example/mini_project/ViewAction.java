@@ -3,6 +3,7 @@ package com.example.mini_project;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,13 @@ public class ViewAction extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_action);
+
+        // Receive data from Intent
+        String username = getIntent().getStringExtra("username");
+
+        // Display the username (if needed)
+        TextView welcomeMessage = findViewById(R.id.tv_username);
+        welcomeMessage.setText("Welcome, " + username + "!");
 
 
         addItems = (CardView) findViewById(R.id.addItems);

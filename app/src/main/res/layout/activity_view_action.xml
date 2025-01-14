@@ -14,7 +14,7 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/firebasename"
+            android:id="@+id/tv_username"
             android:layout_width="398dp"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
