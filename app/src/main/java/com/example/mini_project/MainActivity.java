@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("username", usernameInput); // Optionally pass the username
                         startActivity(intent);
                         Toast.makeText(MainActivity.this, "LOGIN SUCCESSFUL", Toast.LENGTH_SHORT).show();
+                        username.setText("");
+                        password.setText("");
                     } else {
                         // Show error message on invalid credentials
                         Toast.makeText(MainActivity.this, "LOGIN FAILED. Please check your credentials!", Toast.LENGTH_SHORT).show();

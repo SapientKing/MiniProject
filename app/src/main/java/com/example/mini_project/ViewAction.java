@@ -34,20 +34,25 @@ public class ViewAction extends AppCompatActivity {
         viewInventory = (CardView) findViewById(R.id.viewInventory);
 
         //addItems.setOnClickListener(this);
-        //deleteItems.setOnClickListener(this);
         //scanItems.setOnClickListener(this);
         //viewInventory.setOnClickListener(this);
-    }
 
-    public void onClick(View view) {
-        Intent i;
+        addItems.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to DeleteProduct activity
+                Intent intent = new Intent(ViewAction.this, add_Product.class);
+                startActivity(intent);
+            }
+        });
 
-        switch (view.getId()) {
-            //case R.id.addItems : i = new Intent(this,AddProduct.class); startActivity(i); break;
-            //case R.id.deleteItems : i = new Intent(this,DeleteProduct.class);startActivity(i); break;
-            //case R.id.scanItems : i = new Intent(this,ViewProduct.class);startActivity(i); break;
-            //case R.id.viewInventory : i = new Intent(this,ViewInventory.class);startActivity(i); break;
-            default: break;
-        }
+        deleteItems.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to DeleteProduct activity
+                Intent intent = new Intent(ViewAction.this, delete_product.class);
+                startActivity(intent);
+            }
+        });
     }
-}
+    }

@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5EE8"
-    tools:context=".delete_product">
+    android:background="#f5eef8 ">
 
     <!-- Title Text -->
 
@@ -79,7 +78,7 @@
             android:inputType="text"
             android:minHeight="48dp"
             android:padding="12dp"
-            android:textColor="#FFFFFF"
+            android:textColor="#001A6E"
             android:textColorHint="#001A6E" />
     </androidx.cardview.widget.CardView>
 

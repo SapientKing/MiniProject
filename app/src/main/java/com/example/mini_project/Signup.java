@@ -112,7 +112,7 @@ public class Signup extends AppCompatActivity {
             Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show();
 
             // Navigate to ViewAction class
-            Intent intent = new Intent(Signup.this, ViewAction.class);
+            Intent intent = new Intent(Signup.this, MainActivity.class);
             intent.putExtra("username", usernameInput); // Pass data if needed
             startActivity(intent);
             finish(); // Optional: close the current activity
