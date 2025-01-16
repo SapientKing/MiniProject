@@ -21,7 +21,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String PRODUCTS_COL_2 = "NAME";
     public static final String PRODUCTS_COL_3 = "PRICE";
     public static final String PRODUCTS_COL_4 = "QUANTITY";
-    private static final String COLUMN_SUPPLIER = "SUPPLIER";
+    public static final String COLUMN_SUPPLIER = "SUPPLIER";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 2);
