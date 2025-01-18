@@ -10,21 +10,21 @@
     tools:layout_editor_absoluteY="2dp">
 
     <!-- Product Image -->
+
+    <!-- Title -->
     <ImageView
         android:id="@+id/imgProduct"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="24dp"
         android:contentDescription="Product image"
+        android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.524"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle"
-        app:srcCompat="@android:drawable/ic_menu_gallery"
-        android:layout_marginBottom="16dp"
-        android:scaleType="centerCrop"/>
+        app:srcCompat="@android:drawable/ic_menu_gallery" />
 
-    <!-- Title -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"

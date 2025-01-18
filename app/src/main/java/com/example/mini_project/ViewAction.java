@@ -54,5 +54,14 @@ public class ViewAction extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        viewInventory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to DeleteProduct activity
+                Intent intent = new Intent(ViewAction.this, view_inventory.class);
+                startActivity(intent);
+            }
+        });
     }
     }

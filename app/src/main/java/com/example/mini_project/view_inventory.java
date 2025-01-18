@@ -52,7 +52,7 @@ public class view_inventory extends AppCompatActivity {
             int productNameIndex = cursor.getColumnIndex(DatabaseHelper.PRODUCTS_COL_2);
             int priceIndex = cursor.getColumnIndex(DatabaseHelper.PRODUCTS_COL_3);
             int quantityIndex = cursor.getColumnIndex(DatabaseHelper.PRODUCTS_COL_4);
-            int supplierIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_SUPPLIER);
+            int supplierIndex = cursor.getColumnIndex(DatabaseHelper.PRODUCTS_COL_5);
 
             if (productIdIndex != -1) {
                 productId = cursor.getString(productIdIndex);

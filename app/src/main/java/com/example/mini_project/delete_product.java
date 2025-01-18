@@ -25,7 +25,7 @@ public class delete_product extends AppCompatActivity {
         dbHelper = new DatabaseHelper(this);
         txtDelID = findViewById(R.id.txtdelID);
         btnDelete = findViewById(R.id.btnDelete);
-        infoText = findViewById(R.id.infoText);
+        //infoText = findViewById(R.id.infoText);
 
         // Display all products in infoText
         displayProducts();

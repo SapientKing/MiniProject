@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "UserDatabase.db";
+
+    // Users Table
     public static final String TABLE_NAME = "users";
     public static final String COL_1 = "ID";
     public static final String COL_2 = "USERNAME";
@@ -17,11 +19,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Products Table
     public static final String PRODUCTS_TABLE = "products";
-    public static final String PRODUCTS_COL_1 = "ID";
-    public static final String PRODUCTS_COL_2 = "NAME";
-    public static final String PRODUCTS_COL_3 = "PRICE";
-    public static final String PRODUCTS_COL_4 = "QUANTITY";
-    public static final String COLUMN_SUPPLIER = "SUPPLIER";
+    public static final String PRODUCTS_COL_1 = "product_id";
+    public static final String PRODUCTS_COL_2 = "product_name";
+    public static final String PRODUCTS_COL_3 = "price_per_unit";
+    public static final String PRODUCTS_COL_4 = "quantity";
+    public static final String PRODUCTS_COL_5 = "supplier_details";
+    public static final String PRODUCTS_COL_6 = "product_image"; // To store image as BLOB
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 2);
@@ -30,7 +33,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + TABLE_NAME + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, USERNAME TEXT, EMAIL TEXT, PASSWORD TEXT)");
-        db.execSQL("CREATE TABLE " + PRODUCTS_TABLE + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TEXT, PRICE REAL, QUANTITY INTEGER, SUPPLIER TEXT)");
+        db.execSQL("CREATE TABLE " + PRODUCTS_TABLE + " (" +
+                PRODUCTS_COL_1 + " TEXT PRIMARY KEY, " +
+                PRODUCTS_COL_2 + " TEXT, " +
+                PRODUCTS_COL_3 + " REAL, " +
+                PRODUCTS_COL_4 + " INTEGER, " +
+                PRODUCTS_COL_5 + " TEXT, " +
+                PRODUCTS_COL_6 + " BLOB)");
     }
 
     @Override
@@ -47,6 +56,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(COL_3, email);
         contentValues.put(COL_4, password);
         long result = db.insert(TABLE_NAME, null, contentValues);
+        db.close();
         return result != -1;
     }
 
@@ -55,6 +65,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE EMAIL = ?", new String[]{email});
         boolean exists = cursor.getCount() > 0;
         cursor.close();
+        db.close();
         return exists;
     }
 
@@ -63,41 +74,51 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE USERNAME = ? AND PASSWORD = ?", new String[]{username, password});
         boolean isValid = cursor.getCount() > 0;
         cursor.close();
+        db.close();
         return isValid;
     }
-    public boolean insertProduct(String productID, String name, double price, int quantity, String supplier) {
+
+    public boolean insertProduct(String productID, String name, double price, int quantity, String supplier, byte[] image) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-
-        // Insert the product data into the ContentValues
         values.put(PRODUCTS_COL_1, productID);
         values.put(PRODUCTS_COL_2, name);
         values.put(PRODUCTS_COL_3, price);
         values.put(PRODUCTS_COL_4, quantity);
-        values.put(COLUMN_SUPPLIER, supplier);
-
-        // Insert the data into the products table and get the row ID
+        values.put(PRODUCTS_COL_5, supplier);
+        values.put(PRODUCTS_COL_6, image);
         long result = db.insert(PRODUCTS_TABLE, null, values);
-        db.close();  // Close the database connection
-
-        return result != -1;  // Return true if insertion is successful, false otherwise
+        db.close();
+        return result != -1;
     }
 
-    // Fetch all products
     public Cursor getAllProducts() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + PRODUCTS_TABLE, null);
     }
 
-    // Delete a product by ID
-    public boolean deleteProductById(String id) {
+    public Cursor getProductById(String productId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + PRODUCTS_TABLE + " WHERE " + PRODUCTS_COL_1 + " = ?", new String[]{productId});
+    }
+
+    public boolean updateProduct(String productID, String name, double price, int quantity, String supplier, byte[] image) {
         SQLiteDatabase db = this.getWritableDatabase();
-        int result = db.delete(PRODUCTS_TABLE, PRODUCTS_COL_1 + "=?", new String[]{id});
+        ContentValues values = new ContentValues();
+        values.put(PRODUCTS_COL_2, name);
+        values.put(PRODUCTS_COL_3, price);
+        values.put(PRODUCTS_COL_4, quantity);
+        values.put(PRODUCTS_COL_5, supplier);
+        values.put(PRODUCTS_COL_6, image);
+        int result = db.update(PRODUCTS_TABLE, values, PRODUCTS_COL_1 + " = ?", new String[]{productID});
+        db.close();
+        return result > 0;
+    }
+
+    public boolean deleteProductById(String productId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int result = db.delete(PRODUCTS_TABLE, PRODUCTS_COL_1 + " = ?", new String[]{productId});
         db.close();
         return result > 0;
     }
 }
-
-
-
-
