@@ -59,7 +59,7 @@ public class ViewAction extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate to DeleteProduct activity
-                Intent intent = new Intent(ViewAction.this, view_inventory.class);
+                Intent intent = new Intent(ViewAction.this, ProductListActivity.class);
                 startActivity(intent);
             }
         });

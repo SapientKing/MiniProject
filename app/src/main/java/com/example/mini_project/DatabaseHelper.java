@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -121,4 +122,46 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return result > 0;
     }
+
+    public boolean updateProductQuantity(String productId, int newQuantity) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        // Update quantity
+        values.put(PRODUCTS_COL_4, newQuantity);
+
+        // Update the price (recalculate based on quantity if necessary)
+        Cursor cursor = db.query(PRODUCTS_TABLE, new String[]{PRODUCTS_COL_3},
+                PRODUCTS_COL_1 + " = ?", new String[]{productId}, null, null, null);
+
+        double updatedPrice = 0;
+        if (cursor != null && cursor.moveToFirst()) {
+            // Ensure the column index is valid before accessing the price column
+            int priceIndex = cursor.getColumnIndex(PRODUCTS_COL_3);
+            if (priceIndex != -1) {
+                double pricePerUnit = cursor.getDouble(priceIndex);
+                updatedPrice = pricePerUnit * newQuantity;
+            } else {
+                // Handle error if the column index is invalid
+                Log.e("DatabaseHelper", "Price column not found for product: " + productId);
+                cursor.close();
+                db.close();
+                return false;  // Return false if column is not found
+            }
+        } else {
+            cursor.close();
+            db.close();
+            return false;  // Return false if product is not found
+        }
+        cursor.close();
+
+        values.put(PRODUCTS_COL_3, updatedPrice);  // Update the price as well
+
+        // Update product in the database
+        int result = db.update(PRODUCTS_TABLE, values, PRODUCTS_COL_1 + " = ?", new String[]{productId});
+        db.close();
+        return result > 0;
+    }
+
+
 }

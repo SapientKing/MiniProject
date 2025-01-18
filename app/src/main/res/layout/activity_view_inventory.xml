@@ -12,6 +12,21 @@
     <!-- Product Image -->
 
     <!-- Title -->
+
+    <EditText
+        android:id="@+id/etQuantity"
+        android:layout_width="195dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="30dp"
+        android:background="@null"
+        android:gravity="start|center_vertical"
+        android:hint="Quantity"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintStart_toEndOf="@+id/tvQuantity"
+        app:layout_constraintTop_toBottomOf="@+id/tvOutputSupplierDetails" />
+
     <ImageView
         android:id="@+id/imgProduct"
         android:layout_width="150dp"
@@ -143,6 +158,8 @@
         app:layout_constraintStart_toEndOf="@+id/tvSupplierDetails"
         app:layout_constraintTop_toBottomOf="@+id/tvOutputProductName" />
 
+    <!-- Price Output -->
+
     <TextView
         android:id="@+id/tvPrice"
         android:layout_width="wrap_content"
@@ -156,25 +173,11 @@
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvSupplierDetails" />
-
-    <!-- Price Output -->
-    <TextView
-        android:id="@+id/tvOutputPrice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:fontFamily="@font/roboto"
-        android:letterSpacing="0.05"
-        android:textColor="#040404"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.029"
-        app:layout_constraintStart_toEndOf="@+id/tvPrice"
-        app:layout_constraintTop_toBottomOf="@+id/tvOutputSupplierDetails" />
+        app:layout_constraintTop_toBottomOf="@+id/tvQuantity" />
 
     <!-- Quantity Label -->
+
+    <!-- Quantity Output -->
     <TextView
         android:id="@+id/tvQuantity"
         android:layout_width="wrap_content"
@@ -188,11 +191,10 @@
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvPrice" />
+        app:layout_constraintTop_toBottomOf="@+id/tvSupplierDetails" />
 
-    <!-- Quantity Output -->
     <TextView
-        android:id="@+id/tvOutputQuantity"
+        android:id="@+id/tvOutputPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
@@ -202,8 +204,18 @@
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.03"
-        app:layout_constraintStart_toEndOf="@+id/tvQuantity"
-        app:layout_constraintTop_toBottomOf="@+id/tvOutputPrice" />
+        app:layout_constraintHorizontal_bias="0.029"
+        app:layout_constraintStart_toEndOf="@+id/tvPrice"
+        app:layout_constraintTop_toBottomOf="@+id/etQuantity" />
+
+    <Button
+        android:id="@+id/btnUpdate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="64dp"
+        android:text="Update"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
