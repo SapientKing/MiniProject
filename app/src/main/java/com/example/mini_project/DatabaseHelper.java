@@ -116,11 +116,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result > 0;
     }
 
-    public boolean deleteProductById(String productId) {
+    public boolean deleteProductFromDatabase(String productId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        int result = db.delete(PRODUCTS_TABLE, PRODUCTS_COL_1 + " = ?", new String[]{productId});
+        int rowsDeleted = db.delete("products", "product_id = ?", new String[]{productId});
         db.close();
-        return result > 0;
+        return rowsDeleted > 0; // Return true if rows were deleted, false otherwise
     }
 
     public boolean updateProductQuantity(String productId, int newQuantity) {

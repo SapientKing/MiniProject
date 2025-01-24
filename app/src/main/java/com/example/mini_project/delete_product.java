@@ -25,6 +25,7 @@ public class delete_product extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_delete_product);
+        String username = getIntent().getStringExtra("username");
 
         // Initialize Views
         productIdInput = findViewById(R.id.delete_product_id_input);
@@ -38,7 +39,7 @@ public class delete_product extends AppCompatActivity {
 
         // Delete Button Click
         deleteButton.setOnClickListener(v -> {
-            String productId = productIdInput.getText().toString();
+            String productId = productIdInput.getText().toString().trim();
             if (productId.isEmpty()) {
                 Toast.makeText(this, "Please enter a Product ID", Toast.LENGTH_SHORT).show();
             } else {
@@ -48,35 +49,45 @@ public class delete_product extends AppCompatActivity {
     }
 
     private void fetchDetailsAndAutoDisplay(String productId) {
-        // Fetch product details from the database
-        Cursor cursor = database.rawQuery("SELECT product_name, price_per_unit, quantity, product_image FROM products WHERE product_id = ?", new String[]{productId});
+        Cursor cursor = null;
+        try {
+            // Fetch product details from the database
+            cursor = database.rawQuery(
+                    "SELECT product_name, price_per_unit, quantity, product_image FROM products WHERE product_id = ?",
+                    new String[]{productId}
+            );
 
-        if (cursor != null && cursor.moveToFirst()) {
-            // Fetch product details
-            String productName = cursor.getString(0);
-            double pricePerUnit = cursor.getDouble(1);
-            int quantity = cursor.getInt(2);
-            byte[] imageBytes = cursor.getBlob(3);
+            if (cursor.moveToFirst()) {
+                // Fetch product details
+                String productName = cursor.getString(0);
+                double pricePerUnit = cursor.getDouble(1);
+                int quantity = cursor.getInt(2);
+                byte[] imageBytes = cursor.getBlob(3);
 
-            // Automatically display product details
-            productDetailsTextView.setText(String.format("Name: %s\nPrice: %.2f\nQuantity: %d", productName, pricePerUnit, quantity));
+                // Automatically display product details
+                productDetailsTextView.setText(String.format(
+                        "Name: %s\nPrice: %.2f\nQuantity: %d",
+                        productName, pricePerUnit, quantity
+                ));
 
-            // Display product image
-            if (imageBytes != null) {
-                Bitmap productImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                productImageView.setImageBitmap(productImage);
+                // Display product image
+                if (imageBytes != null) {
+                    Bitmap productImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                    productImageView.setImageBitmap(productImage);
+                } else {
+                    Glide.with(this).load(R.drawable.ic_placeholder_image).into(productImageView);
+                }
+
+                // Show confirmation dialog to delete the product
+                confirmAndDelete(productId);
             } else {
-                Glide.with(this).load(R.drawable.ic_placeholder_image).into(productImageView);
+                productDetailsTextView.setText("No product found with the given ID.");
+                Glide.with(this).load(R.drawable.ic_error_image).into(productImageView); // Error image
             }
-
-            cursor.close();
-
-            // Show confirmation dialog to delete the product
-            confirmAndDelete(productId);
-        } else {
-            // Show error if product not found
-            productDetailsTextView.setText("No product found with the given ID.");
-            Glide.with(this).load(R.drawable.ic_error_image).into(productImageView); // Error image
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 
@@ -94,11 +105,12 @@ public class delete_product extends AppCompatActivity {
     }
 
     private void deleteProductFromDatabase(String productId) {
-        // Perform the deletion operation
-        int rowsDeleted = database.delete("products", "product_id = ?", new String[]{productId});
-        if (rowsDeleted > 0) {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        boolean isDeleted = dbHelper.deleteProductFromDatabase(productId);
+
+        if (isDeleted) {
             Toast.makeText(this, "Product Deleted Successfully", Toast.LENGTH_SHORT).show();
-            resetViews(); // Reset all views after deletion
+            resetViews(); // Clear all views after deletion
         } else {
             Toast.makeText(this, "Failed to delete the product", Toast.LENGTH_SHORT).show();
         }

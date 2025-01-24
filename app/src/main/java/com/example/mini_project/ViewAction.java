@@ -4,16 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class ViewAction extends AppCompatActivity {
-    private CardView addItems, deleteItems, scanItems, viewInventory;
+    private CardView addItems, deleteItems, viewInventory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,45 +18,38 @@ public class ViewAction extends AppCompatActivity {
         // Receive data from Intent
         String username = getIntent().getStringExtra("username");
 
-        // Display the username (if needed)
+        // Display the username
         TextView welcomeMessage = findViewById(R.id.tv_username);
-        welcomeMessage.setText("Welcome, " + username + "!");
+        if (username != null) {
+            welcomeMessage.setText("Welcome, " + username + "!");
+        } else {
+            welcomeMessage.setText("Welcome!");
+        }
 
+        // Initialize CardView buttons
+        addItems = findViewById(R.id.addItems);
+        deleteItems = findViewById(R.id.deleteItems);
+        viewInventory = findViewById(R.id.viewInventory);
 
-        addItems = (CardView) findViewById(R.id.addItems);
-        deleteItems = (CardView) findViewById(R.id.deleteItems);
-        //scanItems = (CardView) findViewById(R.id.scanItems);
-        viewInventory = (CardView) findViewById(R.id.viewInventory);
-
-        //addItems.setOnClickListener(this);
-        //scanItems.setOnClickListener(this);
-        //viewInventory.setOnClickListener(this);
-
-        addItems.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to DeleteProduct activity
-                Intent intent = new Intent(ViewAction.this, add_Product.class);
-                startActivity(intent);
-            }
+        // Add Items Click Listener
+        addItems.setOnClickListener(v -> {
+            Intent intent = new Intent(ViewAction.this, add_Product.class);
+            intent.putExtra("username", username); // Pass username
+            startActivity(intent);
         });
 
-        deleteItems.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to DeleteProduct activity
-                Intent intent = new Intent(ViewAction.this, delete_product.class);
-                startActivity(intent);
-            }
+        // Delete Items Click Listener
+        deleteItems.setOnClickListener(v -> {
+            Intent intent = new Intent(ViewAction.this, delete_product.class);
+            intent.putExtra("username", username); // Pass username
+            startActivity(intent);
         });
 
-        viewInventory.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to DeleteProduct activity
-                Intent intent = new Intent(ViewAction.this, ProductListActivity.class);
-                startActivity(intent);
-            }
+        // View Inventory Click Listener
+        viewInventory.setOnClickListener(v -> {
+            Intent intent = new Intent(ViewAction.this, ProductListActivity.class);
+            intent.putExtra("username", username); // Pass username
+            startActivity(intent);
         });
     }
-    }
+}
