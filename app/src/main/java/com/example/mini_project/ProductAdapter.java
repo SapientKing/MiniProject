@@ -82,9 +82,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return byteArrayOutputStream.toByteArray();
     }
 
-
-
-
     @Override
     public int getItemCount() {
         return productList.size();

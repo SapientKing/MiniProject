@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -40,7 +39,6 @@ public class view_inventory extends AppCompatActivity {
         String productId = intent.getStringExtra("product_id");
         String productName = intent.getStringExtra("product_name");
         double productPrice = intent.getDoubleExtra("product_price", 0.0);
-        int productQuantity = intent.getIntExtra("product_quantity", 0);
         String productSupplier = intent.getStringExtra("product_supplier");
         byte[] productImageBytes = intent.getByteArrayExtra("product_image");
 
@@ -67,7 +65,32 @@ public class view_inventory extends AppCompatActivity {
         fetchProductDetails(productId);
 
         // Set up button click listener for updating quantity and price
-        btnUpdate.setOnClickListener(v -> updateQuantityAndPrice());
+        btnUpdate.setOnClickListener(v -> {
+            // Get the new quantity from EditText
+            String quantityText = etQuantity.getText().toString().trim();
+
+            // Validate input
+            if (quantityText.isEmpty()) {
+                Toast.makeText(this, "Please enter a valid quantity.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int newQuantity = Integer.parseInt(quantityText);
+
+            // Show a confirmation dialog
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Confirm Update?")
+                    .setMessage("Are you sure you want to update the quantity to " + newQuantity + "?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        // Proceed with the update if confirmed
+                        updateQuantityAndPrice();
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> {
+                        // Dismiss the dialog if canceled
+                        dialog.dismiss();
+                    })
+                    .show();
+        });
 
         // Get passed data
         byte[] imageBytes = getIntent().getByteArrayExtra("product_image");
@@ -77,7 +100,7 @@ public class view_inventory extends AppCompatActivity {
         }
     }
 
-    private void fetchProductDetails(String productId) {
+       private void fetchProductDetails(String productId) {
         // Query the database to get the product based on product ID
         Cursor cursor = null;
         try {
@@ -98,7 +121,7 @@ public class view_inventory extends AppCompatActivity {
 
                     String productName = cursor.getString(productNameIndex);
                     double price = cursor.getDouble(priceIndex);
-                    int quantity = cursor.getInt(quantityIndex);
+                    int productQuantity = cursor.getInt(quantityIndex);
                     String supplier = cursor.getString(supplierIndex);
                     byte[] imageBytes = cursor.getBlob(imageIndex);
 
@@ -107,7 +130,7 @@ public class view_inventory extends AppCompatActivity {
                     tvOutputProductName.setText(productName);
                     tvOutputSupplierDetails.setText(supplier);
                     tvOutputPrice.setText(String.format("RM %.2f", price));  // Formatting the price to 2 decimal places
-                    etQuantity.setText(String.valueOf(quantity));
+                    etQuantity.setText(String.valueOf(productQuantity));
 
                     // Set the product image if available
                     if (imageBytes != null) {
@@ -143,41 +166,45 @@ public class view_inventory extends AppCompatActivity {
         int newQuantity = Integer.parseInt(quantityText);
 
         // Get current product ID (this can be fetched from the UI or from the database cursor)
-        String productId = tvOutputProductId.getText().toString();
+        String productId = tvOutputProductId.getText().toString().replace("Product ID: ", "").trim();
 
-        // Update quantity in the database
-        boolean isUpdated = databaseHelper.updateProductQuantity(productId, newQuantity);
+        // Fetch the price per unit from the database
+        Cursor cursor = null;
+        try {
+            cursor = databaseHelper.getProductById(productId);
 
-        if (isUpdated) {
-            // Recalculate price based on the new quantity
-            Cursor cursor = null;
-            try {
-                cursor = databaseHelper.getProductById(productId);
-                if (cursor != null && cursor.moveToFirst()) {
-                    // Ensure that the column index is valid before fetching data
-                    int priceIndex = cursor.getColumnIndex(DatabaseHelper.PRODUCTS_COL_3);
-                    if (priceIndex != -1) {
-                        double pricePerUnit = cursor.getDouble(priceIndex);
-                        double updatedPrice = pricePerUnit * newQuantity;  // Calculate total price based on new quantity
-                        tvOutputPrice.setText(String.format("RM %.2f", updatedPrice));  // Display updated price
-                        etQuantity.setText(String.valueOf(newQuantity));  // Update quantity on UI
+            if (cursor != null && cursor.moveToFirst()) {
+                // Ensure that the column index is valid
+                int priceIndex = cursor.getColumnIndex(DatabaseHelper.PRODUCTS_COL_3);
+                if (priceIndex != -1) {
+                    double pricePerUnit = cursor.getDouble(priceIndex); // Fetch the price per unit
+
+                    // Update quantity in the database
+                    boolean isUpdated = databaseHelper.updateProductQuantity(productId, newQuantity);
+
+                    if (isUpdated) {
+                        double totalPrice = pricePerUnit * newQuantity;  // Calculate the total price correctly
+                        tvOutputPrice.setText(String.format("RM %.2f", totalPrice));  // Update the UI with the total price
+                        etQuantity.setText(String.valueOf(newQuantity));  // Update quantity in UI
+                        Toast.makeText(this, "Quantity updated successfully!", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(this, "Price column not found in the database.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Failed to update quantity.", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(this, "Product not found.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Price column not found in the database.", Toast.LENGTH_SHORT).show();
                 }
-            } catch (Exception e) {
-                Toast.makeText(this, "Error updating quantity and price.", Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
+            } else {
+                Toast.makeText(this, "Product not found.", Toast.LENGTH_SHORT).show();
             }
-            Toast.makeText(this, "Quantity updated successfully!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Failed to update quantity.", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Error updating quantity and price.", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
+
+
 }
