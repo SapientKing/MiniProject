@@ -50,6 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+
     public boolean insertData(String username, String email, String password) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -60,6 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return result != -1;
     }
+
 
     public boolean checkUserExists(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -78,6 +80,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return isValid;
     }
+
+    public int validateUsergetid(String username, String password) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT ID FROM users WHERE USERNAME = ? AND PASSWORD = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{username, password});
+
+        try {
+            if (cursor.moveToFirst()) {
+                // Ensure the column "ID" exists
+                int userId = cursor.getInt(cursor.getColumnIndexOrThrow("ID"));
+                return userId; // Return the user ID
+            } else {
+                return -1; // User not found
+            }
+        } catch (IllegalArgumentException e) {
+            // Handle missing column
+            e.printStackTrace();
+            return -1;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+
 
     public boolean insertProduct(String productID, String name, double price, int quantity, String supplier, byte[] image) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -162,6 +190,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return result > 0;
     }
+
+    // Method to get user details by email
+    public Cursor getUserByEmail(String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COL_3 + " = ?", new String[]{email});
+    }
+
+
+    // New method to update user details
+    public boolean updateUser (int userId, String username, String email, String password) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL_2, username);
+        contentValues.put(COL_3, email);
+        contentValues.put(COL_4, password);
+
+        // Update based on userId
+        int result = db.update(TABLE_NAME, contentValues, COL_1 + " = ?", new String[]{String.valueOf(userId)});
+        db.close();
+        return result > 0; // Return true if the update was successful
+    }
+    // Method to get user details by userId
+    public Cursor getUserById(int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COL_1 + " = ?", new String[]{String.valueOf(userId)});
+    }
+
 
 
 }

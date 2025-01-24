@@ -1,7 +1,6 @@
 package com.example.mini_project;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -11,22 +10,38 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class add_Product extends AppCompatActivity {
 
     private static final int PICK_IMAGE_REQUEST = 1;
+
     private EditText productIdInput, productNameInput, supplierInput, priceInput, quantityInput;
+    private AutoCompleteTextView locationInput;
     private ImageView productImageView;
     private Bitmap selectedImageBitmap;
     private SQLiteDatabase database;
+    private PlacesClient placesClient;
+    private ArrayList<String> placeSuggestions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +54,39 @@ public class add_Product extends AppCompatActivity {
         supplierInput = findViewById(R.id.Supplier_input);
         priceInput = findViewById(R.id.price_input);
         quantityInput = findViewById(R.id.quantity_input);
+        locationInput = findViewById(R.id.location_input);
         productImageView = findViewById(R.id.imageView);
         Button addButton = findViewById(R.id.btnInsert);
 
         // Initialize Database
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         database = dbHelper.getWritableDatabase();
+
+        // Initialize Places API
+        Places.initialize(getApplicationContext(), "AIzaSyD_DY-1qP_MU4KvJ5LtVAGxJc9Ol2qI9NU");
+        placesClient = Places.createClient(this);
+
+        // Initialize the list for place suggestions
+        placeSuggestions = new ArrayList<>();
+
+        // Set up TextWatcher for location input
+        locationInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                String query = locationInput.getText().toString();
+                if (query.length() > 2) {  // Trigger search after typing more than 2 characters
+                    searchPlace(query);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
 
         // Image Upload
         productImageView.setOnClickListener(v -> openImagePicker());
@@ -54,6 +96,26 @@ public class add_Product extends AppCompatActivity {
             if (validateInputs()) {
                 insertProductToDatabase();
             }
+        });
+    }
+
+    private void searchPlace(String query) {
+        FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
+                .setQuery(query)
+                .build();
+
+        placesClient.findAutocompletePredictions(request).addOnSuccessListener(response -> {
+            placeSuggestions.clear();
+            for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
+                placeSuggestions.add(prediction.getFullText(null).toString());
+            }
+
+            // Create an ArrayAdapter to display the suggestions
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, placeSuggestions);
+            locationInput.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+        }).addOnFailureListener(e -> {
+            Toast.makeText(this, "Error fetching places: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -82,6 +144,7 @@ public class add_Product extends AppCompatActivity {
                 supplierInput.getText().toString().isEmpty() ||
                 priceInput.getText().toString().isEmpty() ||
                 quantityInput.getText().toString().isEmpty() ||
+                locationInput.getText().toString().isEmpty() ||
                 selectedImageBitmap == null) {
             Toast.makeText(this, "Please fill all fields and upload an image", Toast.LENGTH_SHORT).show();
             return false;
@@ -96,6 +159,7 @@ public class add_Product extends AppCompatActivity {
         values.put("supplier_details", supplierInput.getText().toString());
         values.put("price_per_unit", Double.parseDouble(priceInput.getText().toString()));
         values.put("quantity", Integer.parseInt(quantityInput.getText().toString()));
+       // values.put("location", locationInput.getText().toString());
         values.put("product_image", getBitmapAsByteArray(selectedImageBitmap));
 
         long result = database.insert("products", null, values);
