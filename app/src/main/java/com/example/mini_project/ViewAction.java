@@ -14,7 +14,7 @@ import androidx.cardview.widget.CardView;
 import java.io.File;
 
 public class ViewAction extends AppCompatActivity {
-    private CardView addItems, deleteItems, viewInventory, analysis;
+    private CardView addItems, deleteItems, viewInventory;
     private SharedPreferences sharedPreferences;
     private ImageView profileImageView, logoutIcon;
 
@@ -77,7 +77,6 @@ public class ViewAction extends AppCompatActivity {
         addItems = findViewById(R.id.addItems);
         deleteItems = findViewById(R.id.deleteItems);
         viewInventory = findViewById(R.id.viewInventory);
-        analysis = findViewById(R.id.analysis);
 
         addItems.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,13 +99,6 @@ public class ViewAction extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(ViewAction.this, ProductListActivity.class);
                 startActivity(intent);
-            }
-        });
-        analysis.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Intent intent = new Intent(ViewAction.this, AnalyticsActivity.class);
-               // startActivity(intent);
             }
         });
     }
