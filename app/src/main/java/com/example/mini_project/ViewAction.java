@@ -68,6 +68,10 @@ public class ViewAction extends AppCompatActivity {
             }
         });
 
+        // Initialize CardView buttons
+        addItems = findViewById(R.id.addItems);
+        deleteItems = findViewById(R.id.deleteItems);
+        viewInventory = findViewById(R.id.viewInventory);
 
         // Initialize CardViews and set listeners
         addItems = findViewById(R.id.addItems);

@@ -24,6 +24,7 @@ public class view_inventory extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_inventory);
+        String username = getIntent().getStringExtra("username");
 
         // Initialize views
         tvOutputProductId = findViewById(R.id.tvOutputProductId);

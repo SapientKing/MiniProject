@@ -47,6 +47,7 @@ public class add_Product extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product);
+        String username = getIntent().getStringExtra("username");
 
         // Initialize Views
         productIdInput = findViewById(R.id.product_input);
