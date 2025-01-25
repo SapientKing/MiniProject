@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                         Intent intent = new Intent(getApplicationContext(), ViewAction.class);
                         intent.putExtra("userId", userId); // Pass user ID to the next activity
                         startActivity(intent);
-                        Toast.makeText(MainActivity.this, String.format("User ID: %d - Invalid user ID. Please try again.", userId), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(MainActivity.this, String.format("User ID: %d - Invalid user ID. Please try again.", userId), Toast.LENGTH_SHORT).show();
                         Toast.makeText(MainActivity.this, "LOGIN SUCCESSFUL", Toast.LENGTH_SHORT).show();
                         username.setText("");
                         password.setText("");

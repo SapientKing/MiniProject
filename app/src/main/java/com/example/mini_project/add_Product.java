@@ -132,6 +132,7 @@ public class add_Product extends AppCompatActivity {
             Uri imageUri = data.getData();
             try {
                 selectedImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                //productImageView.setBackground(null);
                 productImageView.setImageBitmap(selectedImageBitmap);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -160,7 +161,7 @@ public class add_Product extends AppCompatActivity {
         values.put("supplier_details", supplierInput.getText().toString());
         values.put("price_per_unit", Double.parseDouble(priceInput.getText().toString()));
         values.put("quantity", Integer.parseInt(quantityInput.getText().toString()));
-       // values.put("location", locationInput.getText().toString());
+        values.put("location", locationInput.getText().toString()); // Add location here
         values.put("product_image", getBitmapAsByteArray(selectedImageBitmap));
 
         long result = database.insert("products", null, values);
@@ -171,6 +172,7 @@ public class add_Product extends AppCompatActivity {
             Toast.makeText(this, "Error Adding Product", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private byte[] getBitmapAsByteArray(Bitmap bitmap) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
