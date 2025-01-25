@@ -1,6 +1,7 @@
 package com.example.mini_project;
 
 import android.content.Intent;
+import android.content.SharedPreferences; // Import SharedPreferences
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -14,6 +15,7 @@ import com.google.android.material.button.MaterialButton;
 public class MainActivity extends AppCompatActivity {
 
     DatabaseHelper databaseHelper;
+    SharedPreferences sharedPreferences; // Declare SharedPreferences
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,9 @@ public class MainActivity extends AppCompatActivity {
         // Initialize the database helper
         databaseHelper = new DatabaseHelper(this);
 
+        // Initialize SharedPreferences
+        sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+
         // Handle login button click
         loginbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -38,21 +43,29 @@ public class MainActivity extends AppCompatActivity {
                 if (usernameInput.isEmpty() || passwordInput.isEmpty()) {
                     Toast.makeText(MainActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 } else {
-                    if (databaseHelper.validateUser(usernameInput, passwordInput)) {
-                        // Navigate to the ViewAction activity on successful login
+                    int userId = databaseHelper.validateUsergetid(usernameInput, passwordInput);
+                    if (userId != -1) {
+                        // Store the username and user ID in SharedPreferences
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("username", usernameInput);
+                        editor.putInt("userId", userId); // Save the user ID
+                        editor.apply();
+
+                        // Navigate to the ViewAction activity with user ID
                         Intent intent = new Intent(getApplicationContext(), ViewAction.class);
-                        intent.putExtra("username", usernameInput); // Optionally pass the username
+                        intent.putExtra("userId", userId); // Pass user ID to the next activity
                         startActivity(intent);
+                        Toast.makeText(MainActivity.this, String.format("User ID: %d - Invalid user ID. Please try again.", userId), Toast.LENGTH_SHORT).show();
                         Toast.makeText(MainActivity.this, "LOGIN SUCCESSFUL", Toast.LENGTH_SHORT).show();
                         username.setText("");
                         password.setText("");
                     } else {
-                        // Show error message on invalid credentials
                         Toast.makeText(MainActivity.this, "LOGIN FAILED. Please check your credentials!", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
         });
+
 
         // Handle signup icon click
         signupIcon.setOnClickListener(new View.OnClickListener() {

@@ -15,20 +15,49 @@
         android:padding="16dp"
         android:background="@drawable/background_gradient">
 
-        <!-- Welcome Text -->
+        <!-- Logout Icon in Top Right -->
+        <ImageView
+            android:id="@+id/logout_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="end"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/logout"
+        android:contentDescription="Logout" />
 
-        <!-- Grid Layout -->
-        <TextView
-            android:id="@+id/tv_username"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:layout_marginTop="32dp"
-            android:gravity="center"
-            android:text="Welcome Admin,"
-            android:textColor="#FFFFFF"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:layout_gravity="end"> <!-- Align to the right -->
+
+            <TextView
+                android:id="@+id/tv_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Welcome Admin,"
+                android:textColor="#FFFFFF"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/profile_icon"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/default_profile"
+                android:background="@drawable/circle_background"
+                android:scaleType="centerCrop"
+                android:clipToOutline="true" />
+
+        </LinearLayout>
 
         <GridLayout
             android:id="@+id/mainGrid"
@@ -113,18 +142,17 @@
 
         </androidx.cardview.widget.CardView>
 
-        <!-- View Inventory Card -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/viewInventory"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_rowWeight="1"
-            android:layout_columnWeight="1"
+            <!-- View Inventory Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/viewInventory"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_rowWeight="1"
+                android:layout_columnWeight="1"
+                android:layout_columnSpan="2"
             android:layout_margin="8dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="12dp"
-            android:layout_columnSpan="2"
-            android:gravity="center">
+            app:cardElevation="12dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -151,6 +179,7 @@
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
+
     </GridLayout>
 </LinearLayout>
     </LinearLayout>
