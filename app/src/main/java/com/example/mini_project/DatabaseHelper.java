@@ -26,9 +26,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String PRODUCTS_COL_4 = "quantity";
     public static final String PRODUCTS_COL_5 = "supplier_details";
     public static final String PRODUCTS_COL_6 = "product_image"; // To store image as BLOB
+    public static final String PRODUCTS_COL_7 = "location"; // To store location as TEXT
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 2);
+        super(context, DATABASE_NAME, null, 3); // Updated database version to 3
     }
 
     @Override
@@ -40,17 +41,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 PRODUCTS_COL_3 + " REAL, " +
                 PRODUCTS_COL_4 + " INTEGER, " +
                 PRODUCTS_COL_5 + " TEXT, " +
-                PRODUCTS_COL_6 + " BLOB)");
+                PRODUCTS_COL_6 + " BLOB, " +
+                PRODUCTS_COL_7 + " TEXT)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + PRODUCTS_TABLE);
-        onCreate(db);
+        Log.d("DatabaseHelper", "Upgrading database from version " + oldVersion + " to " + newVersion);
+
+        if (oldVersion < 3) { // Check if the database needs upgrading
+            // Check if 'location' column exists
+            Cursor cursor = db.rawQuery("PRAGMA table_info(" + PRODUCTS_TABLE + ")", null);
+            boolean locationColumnExists = false;
+            while (cursor.moveToNext()) {
+                String columnName = cursor.getString(1); // Column name is at index 1
+                if (PRODUCTS_COL_7.equals(columnName)) {
+                    locationColumnExists = true;
+                    break;
+                }
+            }
+            cursor.close();
+
+            // Add the 'location' column if it doesn't exist
+            if (!locationColumnExists) {
+                db.execSQL("ALTER TABLE " + PRODUCTS_TABLE + " ADD COLUMN " + PRODUCTS_COL_7 + " TEXT");
+                Log.d("DatabaseHelper", "Added 'location' column to products table");
+            } else {
+                Log.d("DatabaseHelper", "'location' column already exists in products table");
+            }
+        }
     }
 
-
+    // Insert user data
     public boolean insertData(String username, String email, String password) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -62,7 +84,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result != -1;
     }
 
+    // Get user by ID
+    public Cursor getUserById(int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COL_1 + " = ?", new String[]{String.valueOf(userId)});
+    }
 
+    // Check if user exists
     public boolean checkUserExists(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE EMAIL = ?", new String[]{email});
@@ -72,6 +100,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return exists;
     }
 
+    public boolean updateUser(int userId, String username, String email, String password) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL_2, username); // Update USERNAME
+        contentValues.put(COL_3, email);    // Update EMAIL
+        contentValues.put(COL_4, password); // Update PASSWORD
+
+        // Update user based on userId
+        int result = db.update(TABLE_NAME, contentValues, COL_1 + " = ?", new String[]{String.valueOf(userId)});
+        db.close();
+
+        // Check if update was successful
+        return result > 0;
+    }
+
+    // Validate user credentials
     public boolean validateUser(String username, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE USERNAME = ? AND PASSWORD = ?", new String[]{username, password});
@@ -81,33 +125,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return isValid;
     }
 
+    // Validate user and get ID
     public int validateUsergetid(String username, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT ID FROM users WHERE USERNAME = ? AND PASSWORD = ?";
+        String query = "SELECT ID FROM " + TABLE_NAME + " WHERE USERNAME = ? AND PASSWORD = ?";
         Cursor cursor = db.rawQuery(query, new String[]{username, password});
 
         try {
             if (cursor.moveToFirst()) {
-                // Ensure the column "ID" exists
-                int userId = cursor.getInt(cursor.getColumnIndexOrThrow("ID"));
-                return userId; // Return the user ID
+                return cursor.getInt(cursor.getColumnIndexOrThrow(COL_1));
             } else {
                 return -1; // User not found
             }
-        } catch (IllegalArgumentException e) {
-            // Handle missing column
-            e.printStackTrace();
-            return -1;
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
+            db.close();
         }
     }
 
-
-
-    public boolean insertProduct(String productID, String name, double price, int quantity, String supplier, byte[] image) {
+    // Insert product data with logging
+    public boolean insertProduct(String productID, String name, double price, int quantity, String supplier, byte[] image, String location) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(PRODUCTS_COL_1, productID);
@@ -116,22 +155,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(PRODUCTS_COL_4, quantity);
         values.put(PRODUCTS_COL_5, supplier);
         values.put(PRODUCTS_COL_6, image);
+        values.put(PRODUCTS_COL_7, location);
+
+        Log.d("DatabaseHelper", "Inserting product: " + productID);
         long result = db.insert(PRODUCTS_TABLE, null, values);
+
+        if (result == -1) {
+            Log.e("DatabaseHelper", "Error inserting product: " + productID);
+        }
         db.close();
         return result != -1;
     }
 
+    // Get all products
     public Cursor getAllProducts() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + PRODUCTS_TABLE, null);
     }
 
+    // Get product by ID
     public Cursor getProductById(String productId) {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + PRODUCTS_TABLE + " WHERE " + PRODUCTS_COL_1 + " = ?", new String[]{productId});
     }
 
-    public boolean updateProduct(String productID, String name, double price, int quantity, String supplier, byte[] image) {
+    // Update product details
+    public boolean updateProduct(String productID, String name, double price, int quantity, String supplier, byte[] image, String location) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(PRODUCTS_COL_2, name);
@@ -139,84 +188,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(PRODUCTS_COL_4, quantity);
         values.put(PRODUCTS_COL_5, supplier);
         values.put(PRODUCTS_COL_6, image);
+        values.put(PRODUCTS_COL_7, location);
+
         int result = db.update(PRODUCTS_TABLE, values, PRODUCTS_COL_1 + " = ?", new String[]{productID});
         db.close();
         return result > 0;
     }
 
-    public boolean deleteProductFromDatabase(String productId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        int rowsDeleted = db.delete("products", "product_id = ?", new String[]{productId});
-        db.close();
-        return rowsDeleted > 0; // Return true if rows were deleted, false otherwise
-    }
-
+    // Update product quantity
     public boolean updateProductQuantity(String productId, int newQuantity) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-
-        // Update quantity
         values.put(PRODUCTS_COL_4, newQuantity);
 
-        // Update the price (recalculate based on quantity if necessary)
-        Cursor cursor = db.query(PRODUCTS_TABLE, new String[]{PRODUCTS_COL_3},
-                PRODUCTS_COL_1 + " = ?", new String[]{productId}, null, null, null);
+        Cursor cursor = db.query(PRODUCTS_TABLE, new String[]{PRODUCTS_COL_3}, PRODUCTS_COL_1 + " = ?", new String[]{productId}, null, null, null);
 
-        double updatedPrice = 0;
-        if (cursor != null && cursor.moveToFirst()) {
-            // Ensure the column index is valid before accessing the price column
-            int priceIndex = cursor.getColumnIndex(PRODUCTS_COL_3);
-            if (priceIndex != -1) {
-                double pricePerUnit = cursor.getDouble(priceIndex);
-                updatedPrice = pricePerUnit * newQuantity;
-            } else {
-                // Handle error if the column index is invalid
-                Log.e("DatabaseHelper", "Price column not found for product: " + productId);
-                cursor.close();
-                db.close();
-                return false;  // Return false if column is not found
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                double pricePerUnit = cursor.getDouble(cursor.getColumnIndex(PRODUCTS_COL_3));
+                values.put(PRODUCTS_COL_3, pricePerUnit * newQuantity);
             }
-        } else {
             cursor.close();
-            db.close();
-            return false;  // Return false if product is not found
         }
-        cursor.close();
 
-        values.put(PRODUCTS_COL_3, updatedPrice);  // Update the price as well
-
-        // Update product in the database
         int result = db.update(PRODUCTS_TABLE, values, PRODUCTS_COL_1 + " = ?", new String[]{productId});
         db.close();
         return result > 0;
     }
 
-    // Method to get user details by email
-    public Cursor getUserByEmail(String email) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COL_3 + " = ?", new String[]{email});
-    }
-
-
-    // New method to update user details
-    public boolean updateUser (int userId, String username, String email, String password) {
+    // Delete product by ID
+    public boolean deleteProductFromDatabase(String productId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COL_2, username);
-        contentValues.put(COL_3, email);
-        contentValues.put(COL_4, password);
-
-        // Update based on userId
-        int result = db.update(TABLE_NAME, contentValues, COL_1 + " = ?", new String[]{String.valueOf(userId)});
+        int rowsDeleted = db.delete(PRODUCTS_TABLE, PRODUCTS_COL_1 + " = ?", new String[]{productId});
         db.close();
-        return result > 0; // Return true if the update was successful
+        return rowsDeleted > 0;
     }
-    // Method to get user details by userId
-    public Cursor getUserById(int userId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COL_1 + " = ?", new String[]{String.valueOf(userId)});
-    }
-
-
-
 }
