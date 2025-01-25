@@ -100,7 +100,7 @@ public class view_inventory extends AppCompatActivity {
         }
     }
 
-       private void fetchProductDetails(String productId) {
+    private void fetchProductDetails(String productId) {
         // Query the database to get the product based on product ID
         Cursor cursor = null;
         try {
@@ -120,16 +120,19 @@ public class view_inventory extends AppCompatActivity {
                         quantityIndex != -1 && supplierIndex != -1 && imageIndex != -1) {
 
                     String productName = cursor.getString(productNameIndex);
-                    double price = cursor.getDouble(priceIndex);
-                    int productQuantity = cursor.getInt(quantityIndex);
+                    double price = cursor.getDouble(priceIndex); // Get the fixed price per unit
+                    int productQuantity = cursor.getInt(quantityIndex); // Get the current quantity
                     String supplier = cursor.getString(supplierIndex);
                     byte[] imageBytes = cursor.getBlob(imageIndex);
+
+                    // Calculate the total price (Price per unit * Quantity)
+                    double totalPrice = price * productQuantity;
 
                     // Set data to TextViews
                     tvOutputProductId.setText(productId);  // Set the actual product ID
                     tvOutputProductName.setText(productName);
                     tvOutputSupplierDetails.setText(supplier);
-                    tvOutputPrice.setText(String.format("RM %.2f", price));  // Formatting the price to 2 decimal places
+                    tvOutputPrice.setText(String.format("RM %.2f", totalPrice));  // Display the total price
                     etQuantity.setText(String.valueOf(productQuantity));
 
                     // Set the product image if available
@@ -165,10 +168,10 @@ public class view_inventory extends AppCompatActivity {
 
         int newQuantity = Integer.parseInt(quantityText);
 
-        // Get current product ID (this can be fetched from the UI or from the database cursor)
+        // Get current product ID
         String productId = tvOutputProductId.getText().toString().replace("Product ID: ", "").trim();
 
-        // Fetch the price per unit from the database
+        // Fetch the fixed price (unit price) from the database
         Cursor cursor = null;
         try {
             cursor = databaseHelper.getProductById(productId);
@@ -177,14 +180,17 @@ public class view_inventory extends AppCompatActivity {
                 // Ensure that the column index is valid
                 int priceIndex = cursor.getColumnIndex(DatabaseHelper.PRODUCTS_COL_3);
                 if (priceIndex != -1) {
-                    double pricePerUnit = cursor.getDouble(priceIndex); // Fetch the price per unit
+                    double pricePerUnit = cursor.getDouble(priceIndex); // Fetch the fixed price (unit price)
 
-                    // Update quantity in the database
+                    // Recalculate total price (this will NOT be saved to the database)
+                    double totalPrice = pricePerUnit * newQuantity;  // Correct total price calculation
+
+                    // Update quantity in the database (price remains unchanged)
                     boolean isUpdated = databaseHelper.updateProductQuantity(productId, newQuantity);
 
                     if (isUpdated) {
-                        double totalPrice = pricePerUnit * newQuantity;  // Calculate the total price correctly
-                        tvOutputPrice.setText(String.format("RM %.2f", totalPrice));  // Update the UI with the total price
+                        // Update the UI with the correct total price
+                        tvOutputPrice.setText(String.format("RM %.2f", totalPrice));  // Display updated total price
                         etQuantity.setText(String.valueOf(newQuantity));  // Update quantity in UI
                         Toast.makeText(this, "Quantity updated successfully!", Toast.LENGTH_SHORT).show();
                     } else {
@@ -205,6 +211,4 @@ public class view_inventory extends AppCompatActivity {
             }
         }
     }
-
-
 }

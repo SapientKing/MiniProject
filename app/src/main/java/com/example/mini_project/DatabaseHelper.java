@@ -155,37 +155,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        // Update quantity
+        // Update quantity in the database, but not the price
         values.put(PRODUCTS_COL_4, newQuantity);
 
-        // Update the price (recalculate based on quantity if necessary)
-        Cursor cursor = db.query(PRODUCTS_TABLE, new String[]{PRODUCTS_COL_3},
-                PRODUCTS_COL_1 + " = ?", new String[]{productId}, null, null, null);
-
-        double updatedPrice = 0;
-        if (cursor != null && cursor.moveToFirst()) {
-            // Ensure the column index is valid before accessing the price column
-            int priceIndex = cursor.getColumnIndex(PRODUCTS_COL_3);
-            if (priceIndex != -1) {
-                double pricePerUnit = cursor.getDouble(priceIndex);
-                updatedPrice = pricePerUnit * newQuantity;
-            } else {
-                // Handle error if the column index is invalid
-                Log.e("DatabaseHelper", "Price column not found for product: " + productId);
-                cursor.close();
-                db.close();
-                return false;  // Return false if column is not found
-            }
-        } else {
-            cursor.close();
-            db.close();
-            return false;  // Return false if product is not found
-        }
-        cursor.close();
-
-        values.put(PRODUCTS_COL_3, updatedPrice);  // Update the price as well
-
-        // Update product in the database
+        // Update the product in the database
         int result = db.update(PRODUCTS_TABLE, values, PRODUCTS_COL_1 + " = ?", new String[]{productId});
         db.close();
         return result > 0;
@@ -216,7 +189,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COL_1 + " = ?", new String[]{String.valueOf(userId)});
     }
-
-
-
 }

@@ -43,12 +43,16 @@ public class ProductListActivity extends AppCompatActivity {
             while (cursor.moveToNext()) {
                 String id = cursor.getString(0);
                 String name = cursor.getString(1);
-                double price = cursor.getDouble(2);
-                int quantity = cursor.getInt(3);
+                double price = cursor.getDouble(2); // Price per unit
+                int quantity = cursor.getInt(3); // Quantity available
                 String supplier = cursor.getString(4);
                 byte[] image = cursor.getBlob(5);
 
-                products.add(new Product(id, name, price, quantity, supplier, image));
+                // Calculate the total price (price * quantity) for the product
+                double totalPrice = price * quantity;
+
+                // Add the product with the total price
+                products.add(new Product(id, name, totalPrice, quantity, supplier, image));
             }
             cursor.close();
         }
